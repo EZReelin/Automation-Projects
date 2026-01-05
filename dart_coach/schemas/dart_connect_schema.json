@@ -1,0 +1,164 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "dart_connect_match_schema",
+  "title": "Dart Connect Competition Match Schema",
+  "description": "Schema for competitive dart matches captured from Dart Connect",
+  "type": "object",
+  "required": ["match_id", "timestamp", "match_type", "data_source", "opponent", "result", "metrics"],
+  "properties": {
+    "match_id": {
+      "type": "string",
+      "description": "Unique identifier for the match",
+      "pattern": "^dc_[0-9]{8}_[0-9]{6}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of match start"
+    },
+    "data_source": {
+      "type": "string",
+      "const": "dart_connect",
+      "description": "Identifies data as from Dart Connect (competitive environment)"
+    },
+    "context": {
+      "type": "string",
+      "const": "competition",
+      "description": "Competitive match against real players"
+    },
+    "match_type": {
+      "type": "string",
+      "enum": ["league_match", "bar_match", "tournament_match", "playoff_match"],
+      "description": "Type of competitive match"
+    },
+    "competition_details": {
+      "type": "object",
+      "properties": {
+        "league_name": {"type": "string"},
+        "division": {"type": "string"},
+        "season": {"type": "string"},
+        "week_number": {"type": "integer"},
+        "venue": {"type": "string"},
+        "venue_type": {
+          "type": "string",
+          "enum": ["home", "away", "neutral"]
+        }
+      }
+    },
+    "game_format": {
+      "type": "object",
+      "properties": {
+        "game_type": {
+          "type": "string",
+          "enum": ["301", "501", "701", "cricket", "other"]
+        },
+        "legs_format": {"type": "string"},
+        "sets_format": {"type": "string"},
+        "double_in": {"type": "boolean"},
+        "double_out": {"type": "boolean"}
+      }
+    },
+    "opponent": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {"type": "string"},
+        "team": {"type": "string"},
+        "ranking": {"type": "string"},
+        "historical_average": {"type": "number"},
+        "head_to_head_record": {
+          "type": "object",
+          "properties": {
+            "wins": {"type": "integer"},
+            "losses": {"type": "integer"}
+          }
+        }
+      }
+    },
+    "result": {
+      "type": "object",
+      "required": ["won", "legs_won", "legs_lost"],
+      "properties": {
+        "won": {"type": "boolean"},
+        "legs_won": {"type": "integer"},
+        "legs_lost": {"type": "integer"},
+        "sets_won": {"type": "integer"},
+        "sets_lost": {"type": "integer"},
+        "match_deciding_leg": {"type": "boolean"}
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "total_darts": {"type": "integer"},
+        "points_per_dart": {"type": "number"},
+        "three_dart_average": {"type": "number"},
+        "first_nine_average": {"type": "number"},
+        "checkout_percentage": {"type": "number"},
+        "checkout_attempts": {"type": "integer"},
+        "checkouts_hit": {"type": "integer"},
+        "highest_checkout": {"type": "integer"},
+        "doubles": {
+          "type": "object",
+          "properties": {
+            "attempts": {"type": "integer"},
+            "hits": {"type": "integer"},
+            "percentage": {"type": "number"}
+          }
+        },
+        "scoring": {
+          "type": "object",
+          "properties": {
+            "180s": {"type": "integer"},
+            "140_plus": {"type": "integer"},
+            "100_plus": {"type": "integer"},
+            "ton_plus_total": {"type": "integer"}
+          }
+        },
+        "opponent_metrics": {
+          "type": "object",
+          "description": "Opponent's performance in this match",
+          "properties": {
+            "three_dart_average": {"type": "number"},
+            "checkout_percentage": {"type": "number"},
+            "180s": {"type": "integer"}
+          }
+        }
+      }
+    },
+    "pressure_situations": {
+      "type": "object",
+      "description": "Performance in high-pressure moments",
+      "properties": {
+        "match_darts_faced": {"type": "integer"},
+        "match_darts_saved": {"type": "integer"},
+        "match_darts_thrown": {"type": "integer"},
+        "match_darts_converted": {"type": "integer"},
+        "deciding_leg_performance": {
+          "type": "object",
+          "properties": {
+            "won": {"type": "boolean"},
+            "average": {"type": "number"}
+          }
+        }
+      }
+    },
+    "leg_breakdown": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "leg_number": {"type": "integer"},
+          "won": {"type": "boolean"},
+          "darts_used": {"type": "integer"},
+          "checkout": {"type": "integer"},
+          "average": {"type": "number"}
+        }
+      }
+    },
+    "mental_notes": {
+      "type": "string",
+      "description": "Notes about mental state during match"
+    }
+  }
+}

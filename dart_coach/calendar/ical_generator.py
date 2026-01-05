@@ -1,0 +1,207 @@
+"""
+iCal Generator Module
+====================
+Generates iCal (.ics) files for calendar-agnostic integration.
+"""
+
+import logging
+import uuid
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any, Dict, Optional
+
+
+class ICalGenerator:
+    """
+    Generates iCal files for dart performance reports.
+    
+    Compatible with any calendar application that supports .ics files.
+    """
+    
+    def __init__(
+        self,
+        output_dir: Path,
+        organizer_email: str = "dart-coach@local",
+        log_level: str = "INFO"
+    ):
+        """
+        Initialize iCal generator.
+        
+        Args:
+            output_dir: Directory for generated .ics files
+            organizer_email: Email for event organizer
+            log_level: Logging level
+        """
+        self.output_dir = Path(output_dir)
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.organizer_email = organizer_email
+        
+        # Setup logging
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.logger.setLevel(getattr(logging, log_level.upper()))
+        
+        if not self.logger.handlers:
+            handler = logging.StreamHandler()
+            handler.setFormatter(logging.Formatter(
+                '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+            ))
+            self.logger.addHandler(handler)
+    
+    def generate_event(
+        self,
+        report: Dict[str, Any],
+        event_date: Optional[datetime] = None,
+        duration_minutes: int = 30,
+        reminder_minutes: int = 60
+    ) -> Path:
+        """
+        Generate an iCal file for the weekly analysis.
+        
+        Args:
+            report: Analysis report data
+            event_date: Date/time for the event
+            duration_minutes: Event duration
+            reminder_minutes: Reminder before event
+            
+        Returns:
+            Path to generated .ics file
+        """
+        # Default to next Sunday 6 PM
+        if event_date is None:
+            today = datetime.now()
+            days_until_sunday = (6 - today.weekday()) % 7
+            if days_until_sunday == 0:
+                days_until_sunday = 7
+            event_date = today + timedelta(days=days_until_sunday)
+            event_date = event_date.replace(hour=18, minute=0, second=0, microsecond=0)
+        
+        end_date = event_date + timedelta(minutes=duration_minutes)
+        
+        # Generate unique ID
+        uid = str(uuid.uuid4())
+        
+        # Build event content
+        period = report.get('week_period', {})
+        summary = f"🎯 Dart Coach Weekly Analysis - Week {period.get('week_number', 'N/A')}"
+        description = self._build_description(report)
+        
+        # Format dates for iCal
+        def format_datetime(dt):
+            return dt.strftime('%Y%m%dT%H%M%S')
+        
+        # Build iCal content
+        ical_content = f"""BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Dart Performance Coach//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:{uid}
+DTSTAMP:{format_datetime(datetime.now())}
+DTSTART:{format_datetime(event_date)}
+DTEND:{format_datetime(end_date)}
+SUMMARY:{summary}
+DESCRIPTION:{self._escape_text(description)}
+ORGANIZER:mailto:{self.organizer_email}
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Weekly Dart Analysis Review
+TRIGGER:-PT{reminder_minutes}M
+END:VALARM
+END:VEVENT
+END:VCALENDAR
+"""
+        
+        # Save file
+        filename = f"dart_analysis_{event_date.strftime('%Y%m%d')}.ics"
+        filepath = self.output_dir / filename
+        
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(ical_content)
+        
+        self.logger.info(f"Generated iCal file: {filepath}")
+        return filepath
+    
+    def _build_description(self, report: Dict[str, Any]) -> str:
+        """Build event description from report."""
+        analysis = report.get('analysis', {})
+        practice = report.get('practice_summary', {})
+        competition = report.get('competition_summary', {})
+        
+        lines = [
+            "WEEKLY DART PERFORMANCE ANALYSIS",
+            "",
+            f"Period: {report.get('week_period', {}).get('start_date', 'N/A')} to {report.get('week_period', {}).get('end_date', 'N/A')}",
+            "",
+            "EXECUTIVE SUMMARY",
+            analysis.get('executive_summary', 'Review your weekly performance report.')[:200],
+            "",
+            "PRACTICE PERFORMANCE",
+            f"Sessions: {practice.get('sessions_count', 0)}",
+            f"Average: {practice.get('metrics', {}).get('average_three_dart', 0):.1f}",
+            f"Checkout: {practice.get('metrics', {}).get('average_checkout_pct', 0):.1f}%",
+            "",
+            "COMPETITION PERFORMANCE",
+            f"Matches: {competition.get('total_matches', 0)}",
+            f"Record: {competition.get('matches_won', 0)}-{competition.get('matches_lost', 0)}",
+            "",
+            "Generated by Dart Performance Coach"
+        ]
+        
+        return "\\n".join(lines)
+    
+    def _escape_text(self, text: str) -> str:
+        """Escape text for iCal format."""
+        # Replace newlines with escaped newlines
+        text = text.replace('\n', '\\n')
+        # Escape commas and semicolons
+        text = text.replace(',', '\\,')
+        text = text.replace(';', '\\;')
+        return text
+    
+    def generate_recurring_series(
+        self,
+        start_date: datetime,
+        weeks: int = 4,
+        duration_minutes: int = 30
+    ) -> List[Path]:
+        """
+        Generate a series of recurring weekly events.
+        
+        Args:
+            start_date: Start date for the series
+            weeks: Number of weeks to generate
+            duration_minutes: Event duration
+            
+        Returns:
+            List of paths to generated .ics files
+        """
+        files = []
+        
+        current_date = start_date
+        
+        for week in range(weeks):
+            # Create placeholder report
+            report = {
+                'week_period': {
+                    'week_number': current_date.isocalendar()[1],
+                    'start_date': (current_date - timedelta(days=7)).isoformat(),
+                    'end_date': current_date.isoformat()
+                },
+                'analysis': {
+                    'executive_summary': f'Weekly analysis for week {current_date.isocalendar()[1]}'
+                },
+                'practice_summary': {'sessions_count': 0, 'metrics': {}},
+                'competition_summary': {'total_matches': 0, 'matches_won': 0, 'matches_lost': 0, 'metrics': {}}
+            }
+            
+            filepath = self.generate_event(
+                report,
+                event_date=current_date,
+                duration_minutes=duration_minutes
+            )
+            files.append(filepath)
+            
+            current_date += timedelta(weeks=1)
+        
+        return files
