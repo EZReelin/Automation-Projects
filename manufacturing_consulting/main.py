@@ -20,7 +20,7 @@ from database.base import init_db, close_db
 from utils.logging import setup_logging, request_logger, get_logger
 
 # Import routers
-from api.routes import auth, quotes, knowledge, erp, admin, tenants
+from api.routes import auth, quotes, knowledge, erp, admin, tenants, imports, costs
 
 logger = get_logger(__name__)
 
@@ -153,6 +153,8 @@ app.include_router(knowledge.router, prefix=f"{settings.api_prefix}/knowledge", 
 app.include_router(erp.router, prefix=f"{settings.api_prefix}/erp", tags=["ERP Copilot"])
 app.include_router(tenants.router, prefix=f"{settings.api_prefix}/tenants", tags=["Tenant Management"])
 app.include_router(admin.router, prefix=f"{settings.api_prefix}/admin", tags=["Admin Dashboard"])
+app.include_router(imports.router, tags=["Data Import"])
+app.include_router(costs.router, tags=["Manufacturing Costs"])
 
 
 # Health check endpoint

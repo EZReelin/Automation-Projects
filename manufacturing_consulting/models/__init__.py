@@ -71,6 +71,20 @@ from models.erp_copilot import (
     QueryCategory,
 )
 
+from models.manufacturing_costs import (
+    WorkCenter,
+    LaborRate,
+    MaterialCost,
+    Routing,
+    RoutingOperation,
+    OverheadRate,
+    CostRollup,
+    QuoteCostEstimate,
+    CostType,
+    LaborType,
+    MachineType,
+)
+
 __all__ = [
     # Tenant
     "Tenant",
@@ -124,4 +138,16 @@ __all__ = [
     "ERPSystem",
     "DocumentType",
     "QueryCategory",
+    # Manufacturing Costs
+    "WorkCenter",
+    "LaborRate",
+    "MaterialCost",
+    "Routing",
+    "RoutingOperation",
+    "OverheadRate",
+    "CostRollup",
+    "QuoteCostEstimate",
+    "CostType",
+    "LaborType",
+    "MachineType",
 ]

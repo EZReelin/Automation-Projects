@@ -6,16 +6,19 @@ Provides functionality for:
 - Automated quote generation with AI assistance
 - Historical quote lookup and analysis
 - Quote version control and approval workflows
+- Manufacturing cost calculation (machine hours, labor, materials)
 """
 
 from services.quote_intelligence.parts_service import PartsService
 from services.quote_intelligence.quote_service import QuoteService
 from services.quote_intelligence.matching_service import PartMatchingService
 from services.quote_intelligence.pricing_service import PricingService
+from services.quote_intelligence.cost_calculation_service import CostCalculationService
 
 __all__ = [
     "PartsService",
     "QuoteService",
     "PartMatchingService",
     "PricingService",
+    "CostCalculationService",
 ]

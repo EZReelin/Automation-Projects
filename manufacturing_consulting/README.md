@@ -43,6 +43,8 @@ AI-powered platform for manufacturing consulting services, providing three inter
 - **Historical Lookup**: Search and analyze past quotes by part, customer, date
 - **Version Control**: Track quote iterations and changes
 - **Pricing Intelligence**: AI-assisted pricing recommendations
+- **Manufacturing Cost Calculation**: Full cost breakdown with machine hours, labor rates, and overhead
+- **Universal Data Import**: Import from any ERP system via CSV, Excel, JSON, or XML
 
 ### Knowledge Preservation Package ($3,000-$5,000 per domain)
 - **Interview Management**: Schedule and track SME interviews
@@ -57,6 +59,100 @@ AI-powered platform for manufacturing consulting services, providing three inter
 - **Context-Aware Responses**: Answers reference specific documentation
 - **Gap Identification**: Track unanswered questions for doc improvements
 - **Usage Analytics**: Monitor adoption and common queries
+
+## Universal ERP Integration
+
+The system is designed to work with **any ERP system** used in manufacturing. Rather than requiring expensive, proprietary integrations, we use a flexible approach:
+
+### Supported Integration Methods
+
+| Method | Best For | Complexity |
+|--------|----------|------------|
+| **File Import** (CSV, Excel, JSON, XML) | Any ERP | Low |
+| **REST API** | Modern ERPs with APIs | Medium |
+| **OData** | Microsoft Dynamics, SAP | Medium |
+| **Database Direct** (ODBC) | Legacy systems | High |
+
+### Pre-Built Mappings Available For
+
+- SAP (S/4HANA, Business One, ECC)
+- Oracle (NetSuite, JD Edwards, E-Business Suite)
+- Microsoft Dynamics (365, NAV, GP)
+- Epicor (Prophet 21, Kinetic)
+- SYSPRO
+- Infor (CloudSuite, SyteLine, VISUAL)
+- Sage (100, 300, X3)
+- JobBOSS
+- E2 Shop System
+- Global Shop Solutions
+- ECi M1
+- Plex
+- IQMS/DELMIAworks
+- **Any system with CSV/Excel export** (Generic mappings)
+
+### Import Workflow
+
+1. Export data from your ERP (parts, routings, costs, customers)
+2. Use `/api/v1/imports/validate` to preview and map fields
+3. Import with automatic field detection
+4. System suggests mappings based on detected columns
+
+## Manufacturing Cost Calculation
+
+The system includes comprehensive manufacturing cost support for accurate quoting:
+
+### Cost Components
+
+| Component | Description | Source |
+|-----------|-------------|--------|
+| **Material Costs** | Raw materials with scrap factors | Material cost tables |
+| **Machine Hours** | Equipment time at hourly rates | Routings + Work centers |
+| **Labor Hours** | Setup + run time by skill level | Routings + Labor rates |
+| **Overhead** | Burden allocation | Overhead rates |
+| **Outside Processing** | Subcontract operations | Routing operations |
+| **Tooling** | Fixtures and consumable tooling | Routing operations |
+
+### Work Center Rates
+
+Define hourly rates for each machine/work center:
+- Machine rate per hour (depreciation, maintenance, utilities)
+- Labor rate per hour (operator wages)
+- Overhead rate per hour (facility, supervision)
+
+### Labor Rate Management
+
+Track labor costs by skill classification:
+- Unskilled, Semi-skilled, Skilled, Technician, Engineer
+- Base rate + burden (benefits, insurance)
+- Overtime multipliers
+
+### Routing-Based Costing
+
+Import or define manufacturing routings with:
+- Operation sequence and work center assignments
+- Setup time and run time per piece
+- Outside processing costs
+- Tooling and fixture costs
+
+### API Endpoints
+
+```bash
+# Calculate cost for a part
+POST /api/v1/costs/calculate
+{
+  "part_id": "...",
+  "quantity": 100
+}
+
+# Import work centers with rates
+POST /api/v1/imports/work-centers
+
+# Import labor rates
+POST /api/v1/imports/labor-rates
+
+# Import routings
+POST /api/v1/imports/routings
+```
 
 ## Technology Stack
 
@@ -151,7 +247,9 @@ manufacturing_consulting/
 │   │   ├── knowledge.py  # Knowledge Preservation endpoints
 │   │   ├── erp.py        # ERP Copilot endpoints
 │   │   ├── tenants.py    # Tenant management
-│   │   └── admin.py      # Admin dashboard
+│   │   ├── admin.py      # Admin dashboard
+│   │   ├── imports.py    # Universal data import endpoints
+│   │   └── costs.py      # Manufacturing cost endpoints
 │   └── dependencies.py   # FastAPI dependencies
 ├── config/
 │   ├── settings.py       # Configuration management
@@ -163,12 +261,22 @@ manufacturing_consulting/
 │   ├── user.py           # User and authentication models
 │   ├── quote_intelligence.py  # Quote system models
 │   ├── knowledge_preservation.py  # SOP system models
-│   └── erp_copilot.py    # ERP system models
+│   ├── erp_copilot.py    # ERP system models
+│   └── manufacturing_costs.py  # Work centers, routings, cost models
 ├── services/
 │   ├── auth_service.py   # Authentication service
 │   ├── quote_intelligence/   # Quote services
+│   │   ├── parts_service.py
+│   │   ├── quote_service.py
+│   │   ├── matching_service.py
+│   │   ├── pricing_service.py
+│   │   └── cost_calculation_service.py  # Manufacturing cost calculations
 │   ├── knowledge_preservation/  # Knowledge services
-│   └── erp_copilot/      # ERP services
+│   ├── erp_copilot/      # ERP services
+│   └── integrations/     # Universal ERP integration
+│       ├── erp_connector.py    # Connection handlers
+│       ├── data_import.py      # Parts/customer import
+│       └── cost_import.py      # Work centers/routings import
 ├── schemas/
 │   └── __init__.py       # Pydantic schemas
 ├── utils/
@@ -203,11 +311,14 @@ Tenants can subscribe to services independently:
 
 ### Quote Intelligence System
 1. Initial consultation and requirements gathering
-2. Parts catalog import (CSV/API)
-3. Historical quote import
-4. Customer data setup
-5. Template customization
-6. User training
+2. **ERP Data Export**: Client exports data from their existing system
+3. **Parts & Customer Import**: Upload CSV/Excel files via `/api/v1/imports/parts` and `/api/v1/imports/customers`
+4. **Work Center Setup**: Import machine/work center definitions with hourly rates
+5. **Labor Rates**: Configure labor rates by skill classification
+6. **Routing Import**: Import manufacturing routings from ERP or create manually
+7. **Cost Validation**: Verify cost calculations against known parts
+8. Template customization
+9. User training
 
 ### Knowledge Preservation Package
 1. Identify knowledge domains
