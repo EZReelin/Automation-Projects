@@ -1,0 +1,167 @@
+# Dart Performance Analysis System Configuration
+# =============================================
+
+system:
+  name: "Dart Performance Coach"
+  version: "1.0.0"
+  data_retention_days: 90
+  timezone: "America/New_York"
+  log_level: "INFO"
+
+# Scolia Web Client Configuration
+scolia:
+  base_url: "https://web.scolia.app"
+  api_endpoint: "https://api.scolia.app/v1"
+  # Authentication - set via environment variables
+  # SCOLIA_USERNAME and SCOLIA_PASSWORD
+  session_timeout: 3600
+  retry_attempts: 3
+  retry_delay: 5
+  data_types:
+    - practice_sessions
+    - cpu_matches
+    - online_matches
+  metrics_to_capture:
+    - points_per_dart
+    - checkout_percentage
+    - first_nine_average
+    - doubles_hit_rate
+    - triples_hit_rate
+    - 180s_count
+    - ton_plus_count
+    - highest_checkout
+
+# Dart Connect Configuration  
+dart_connect:
+  base_url: "https://dartconnect.com"
+  api_endpoint: "https://api.dartconnect.com/v1"
+  # Authentication - set via environment variables
+  # DART_CONNECT_USERNAME and DART_CONNECT_PASSWORD
+  session_timeout: 3600
+  retry_attempts: 3
+  retry_delay: 5
+  data_types:
+    - league_matches
+    - bar_matches
+    - tournament_matches
+  metrics_to_capture:
+    - match_result
+    - legs_won
+    - legs_lost
+    - opponent_info
+    - venue
+    - points_per_dart
+    - checkout_percentage
+    - first_nine_average
+    - pressure_situations
+
+# Biomechanics Configuration
+biomechanics:
+  camera:
+    type: "OBSBOT Tiny Lite 2"
+    resolution: "1920x1080"
+    framerate: 30
+    auto_tracking: true
+    tracking_mode: "upper_body"
+  mediapipe:
+    model_complexity: 2
+    min_detection_confidence: 0.7
+    min_tracking_confidence: 0.7
+    enable_segmentation: false
+  analysis:
+    keypoints_of_interest:
+      - right_shoulder
+      - right_elbow
+      - right_wrist
+      - left_shoulder
+      - left_elbow
+      - left_wrist
+      - nose
+      - right_hip
+      - left_hip
+    throw_phases:
+      - setup
+      - backswing
+      - acceleration
+      - release
+      - follow_through
+    metrics:
+      - elbow_angle_at_release
+      - shoulder_rotation
+      - stance_width
+      - body_lean
+      - release_point_height
+      - follow_through_extension
+
+# Voice Observation Configuration
+voice:
+  audio:
+    sample_rate: 16000
+    channels: 1
+    format: "wav"
+    chunk_duration: 30  # seconds per chunk
+  transcription:
+    model: "whisper"
+    language: "en"
+    enable_timestamps: true
+  keywords:
+    technique:
+      - grip
+      - stance
+      - release
+      - follow-through
+      - aim
+      - rhythm
+      - timing
+    mental:
+      - focus
+      - confident
+      - nervous
+      - frustrated
+      - relaxed
+      - concentration
+    physical:
+      - tired
+      - fresh
+      - sore
+      - warmed-up
+      - stiff
+
+# Data Pipeline Configuration
+data_pipeline:
+  aggregation_schedule: "0 22 * * *"  # Daily at 10 PM
+  output_format: "json"
+  compression: false
+  validation: true
+  backup_enabled: true
+  backup_retention_days: 30
+
+# Ollama Analysis Configuration
+ollama:
+  base_url: "http://localhost:11434"
+  model: "llama3.1:8b"
+  temperature: 0.7
+  max_tokens: 4096
+  analysis_prompts:
+    weekly_summary: true
+    trend_analysis: true
+    improvement_suggestions: true
+    practice_recommendations: true
+    mental_game_insights: true
+
+# Calendar Integration Configuration
+calendar:
+  provider: "google"  # google, outlook, ical
+  # Authentication via environment variables
+  # GOOGLE_CALENDAR_CREDENTIALS_FILE
+  calendar_id: "primary"
+  event_duration_minutes: 30
+  event_title_prefix: "Dart Coach Weekly Analysis"
+  notification_minutes_before: 60
+
+# Weekly Analysis Schedule
+schedule:
+  analysis_day: "sunday"
+  analysis_time: "18:00"
+  lookback_days: 7
+  include_comparison_to_previous_week: true

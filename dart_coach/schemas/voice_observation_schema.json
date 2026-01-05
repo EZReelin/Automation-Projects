@@ -1,0 +1,167 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "voice_observation_schema",
+  "title": "Voice Observation Schema",
+  "description": "Schema for timestamped voice observations during practice sessions",
+  "type": "object",
+  "required": ["observation_id", "timestamp", "data_source", "observations"],
+  "properties": {
+    "observation_id": {
+      "type": "string",
+      "description": "Unique identifier for this observation session",
+      "pattern": "^voice_[0-9]{8}_[0-9]{6}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of recording start"
+    },
+    "data_source": {
+      "type": "string",
+      "const": "voice_observation",
+      "description": "Identifies data as voice observations"
+    },
+    "session_reference": {
+      "type": "string",
+      "description": "Reference to associated practice session (Scolia ID or biomechanics ID)"
+    },
+    "recording_duration_seconds": {
+      "type": "number"
+    },
+    "audio_file_path": {
+      "type": "string",
+      "description": "Path to the original audio recording"
+    },
+    "transcription_model": {
+      "type": "string",
+      "description": "Model used for transcription (e.g., whisper)"
+    },
+    "observations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["timestamp_offset", "transcription"],
+        "properties": {
+          "observation_number": {
+            "type": "integer"
+          },
+          "timestamp_offset": {
+            "type": "number",
+            "description": "Seconds from start of recording"
+          },
+          "timestamp_absolute": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "transcription": {
+            "type": "string",
+            "description": "Raw transcribed text"
+          },
+          "duration_seconds": {
+            "type": "number"
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "categories": {
+            "type": "array",
+            "description": "Auto-detected categories based on keywords",
+            "items": {
+              "type": "string",
+              "enum": [
+                "technique",
+                "mental_state",
+                "physical_state",
+                "target_selection",
+                "equipment",
+                "environmental",
+                "performance",
+                "general"
+              ]
+            }
+          },
+          "detected_keywords": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "sentiment": {
+            "type": "string",
+            "enum": ["positive", "neutral", "negative"],
+            "description": "Detected sentiment of the observation"
+          },
+          "associated_throw": {
+            "type": "integer",
+            "description": "Throw number this observation relates to, if identifiable"
+          },
+          "parsed_insights": {
+            "type": "object",
+            "description": "Structured insights extracted from transcription",
+            "properties": {
+              "technique_notes": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "mental_notes": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "physical_notes": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "action_items": {
+                "type": "array",
+                "items": {"type": "string"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "session_summary": {
+      "type": "object",
+      "description": "Aggregated summary of all observations",
+      "properties": {
+        "total_observations": {
+          "type": "integer"
+        },
+        "category_breakdown": {
+          "type": "object",
+          "additionalProperties": {"type": "integer"}
+        },
+        "sentiment_breakdown": {
+          "type": "object",
+          "properties": {
+            "positive": {"type": "integer"},
+            "neutral": {"type": "integer"},
+            "negative": {"type": "integer"}
+          }
+        },
+        "key_themes": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "recurring_issues": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "issue": {"type": "string"},
+              "frequency": {"type": "integer"}
+            }
+          }
+        },
+        "positive_observations": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "areas_for_focus": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    }
+  }
+}
