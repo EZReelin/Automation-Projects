@@ -46,8 +46,9 @@ def validate_workbook():
     entry_date = ws_import['B6'].value
     total_duty = ws_import['B8'].value
     freight_total = ws_import['B9'].value
-    shipment_weight = ws_import['B10'].value
-    num_skids = ws_import['B11'].value
+    shipment_weight_kgs = ws_import['B10'].value
+    shipment_weight_lbs = shipment_weight_kgs * 2.20462 if shipment_weight_kgs else 0
+    num_skids = ws_import['B12'].value
     # Calculate net freight since it's a formula
     net_freight = freight_total - total_duty if (freight_total and total_duty) else 0
 
@@ -56,7 +57,8 @@ def validate_workbook():
     print(f"Entry Date:             {entry_date.strftime('%m/%d/%Y') if isinstance(entry_date, datetime) else entry_date}")
     print(f"Total Duty (Box 37):    ${total_duty:,.2f}")
     print(f"Freight Invoice Total:  ${freight_total:,.2f}")
-    print(f"Shipment Weight (KGS):  {shipment_weight:,.2f}")
+    print(f"Shipment Weight (KGS):  {shipment_weight_kgs:,.2f}")
+    print(f"Shipment Weight (LBS):  {shipment_weight_lbs:,.2f}")
     print(f"Number of Skids:        {num_skids}")
     print(f"NET FREIGHT ALLOCATED:  ${net_freight:,.2f}")
     print()
@@ -64,7 +66,7 @@ def validate_workbook():
     # Validate against expected
     print("Validation Checks:")
     freight_diff = abs(net_freight - expected_totals["shipment_cost"])
-    weight_match = abs(shipment_weight - expected_totals["shipment_weight_kgs"]) < 0.01
+    weight_match = abs(shipment_weight_kgs - expected_totals["shipment_weight_kgs"]) < 0.01
     skids_match = num_skids == expected_totals["total_skids"]
 
     if freight_diff < 1.0:  # Allow $1 difference due to rounding
@@ -72,7 +74,7 @@ def validate_workbook():
     else:
         print(f"  ✗ Net Freight: ${net_freight:,.2f} (expected ${expected_totals['shipment_cost']:,.2f}, diff: ${freight_diff:.2f})")
 
-    print(f"  {'✓' if weight_match else '✗'} Shipment Weight: {shipment_weight:,.2f} KGS (expected {expected_totals['shipment_weight_kgs']:,.2f})")
+    print(f"  {'✓' if weight_match else '✗'} Shipment Weight: {shipment_weight_kgs:,.2f} KGS / {shipment_weight_lbs:,.2f} LBS (expected {expected_totals['shipment_weight_kgs']:,.2f} KGS)")
     print(f"  {'✓' if skids_match else '✗'} Total Skids: {num_skids} (expected {expected_totals['total_skids']})")
     print()
 
@@ -85,7 +87,7 @@ def validate_workbook():
     ws_calc = wb["Shipment Calculation"]
 
     # Read calculated values for each part
-    print(f"{'Part #':<12} {'Net Wt':<10} {'QTY(M)':<10} {'Skids':<8} {'Cost':<12} {'Cost/M':<10} {'Status'}")
+    print(f"{'Part #':<12} {'LBS/M':<10} {'QTY(M)':<10} {'Skids':<8} {'Cost':<12} {'Cost/M':<10} {'Status'}")
     print("-" * 80)
 
     all_parts_match = True
@@ -96,17 +98,17 @@ def validate_workbook():
     total_parts_weight = 0
 
     for row in range(5, 9):  # Rows 5-8 contain our 4 parts
-        import_row = row + 12  # Maps row 5 to import row 17, etc.
+        import_row = row + 13  # Maps row 5 to import row 18, etc.
         part_num = ws_import[f'A{import_row}'].value
         if not part_num or part_num == "":
             continue
 
-        net_weight = ws_import[f'B{import_row}'].value
+        net_weight_lbs_per_m = ws_import[f'B{import_row}'].value
         qty_m = ws_import[f'C{import_row}'].value
         skids = ws_import[f'D{import_row}'].value
 
-        if net_weight and qty_m:
-            total_weight = net_weight * qty_m
+        if net_weight_lbs_per_m and qty_m:
+            total_weight = net_weight_lbs_per_m * qty_m
         else:
             total_weight = 0
 
@@ -114,7 +116,7 @@ def validate_workbook():
         parts_data.append({
             'row': row,
             'part_num': part_num,
-            'net_weight': net_weight,
+            'net_weight_lbs_per_m': net_weight_lbs_per_m,
             'qty_m': qty_m,
             'skids': skids,
             'total_weight': total_weight
@@ -123,7 +125,7 @@ def validate_workbook():
     # Second pass: calculate percentages and costs
     for part in parts_data:
         part_num = part['part_num']
-        net_weight = part['net_weight']
+        net_weight_lbs_per_m = part['net_weight_lbs_per_m']
         qty_m = part['qty_m']
         skids = part['skids']
         total_weight = part['total_weight']
@@ -156,7 +158,7 @@ def validate_workbook():
 
             total_cost += cost_allocated if cost_allocated else 0
 
-            print(f"{part_num:<12} {net_weight:<10.2f} {qty_m:<10.1f} {skids:<8} ${cost_allocated:<11.2f} ${cost_per_m:<9.2f} {status}")
+            print(f"{part_num:<12} {net_weight_lbs_per_m:<10.2f} {qty_m:<10.1f} {skids:<8} ${cost_allocated:<11.2f} ${cost_per_m:<9.2f} {status}")
 
             # Show expected vs actual if there's a difference
             if not cost_match:
@@ -181,7 +183,7 @@ def validate_workbook():
 
     for row in range(3, 7):
         # Get part number (formula reference)
-        import_row = row + 14  # Maps ERP row 3 to import row 17
+        import_row = row + 15  # Maps ERP row 3 to import row 18
         part_num = ws_import[f'A{import_row}'].value
         if not part_num or part_num == "":
             continue

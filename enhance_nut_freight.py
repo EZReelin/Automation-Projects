@@ -140,9 +140,14 @@ def enhance_workbook():
     ws_import['B10'].fill = green_fill
     ws_import['C10'] = "From BOL or customs doc"
 
-    ws_import['A11'] = "Number of Skids:"
-    ws_import['B11'].number_format = number_format
-    ws_import['B11'].fill = green_fill
+    ws_import['A11'] = "Shipment Weight (LBS):"
+    ws_import['B11'] = "=B10*2.20462"
+    ws_import['B11'].number_format = decimal2_format
+    ws_import['C11'] = "Auto-calculated from KGS"
+
+    ws_import['A12'] = "Number of Skids:"
+    ws_import['B12'].number_format = number_format
+    ws_import['B12'].fill = green_fill
 
     ws_import['A13'] = "NET FREIGHT TO ALLOCATE:"
     ws_import['B13'] = "=B9-B8"
@@ -153,19 +158,19 @@ def enhance_workbook():
     ws_import['A15'] = "STEP 2: Paste Part Details Below"
     ws_import['A15'].font = bold_font
 
-    # Section B: Part Detail Table (Rows 16-50)
-    headers_import = ["Part #", "Net Weight (KG)", "QTY (M)", "# of Skids", "Status"]
+    # Section B: Part Detail Table (Rows 17-51)
+    headers_import = ["Part #", "Net Weight (LBS/M)", "QTY (M)", "# of Skids", "Status"]
 
     for col_idx, header in enumerate(headers_import, start=1):
-        cell = ws_import.cell(row=16, column=col_idx)
+        cell = ws_import.cell(row=17, column=col_idx)
         cell.value = header
         cell.font = bold_font
         cell.fill = header_fill
         cell.alignment = center_align
         cell.border = thin_border
 
-    # Rows 17-50: Input area with formulas
-    for row in range(17, 51):
+    # Rows 18-51: Input area with formulas
+    for row in range(18, 52):
         ws_import[f'A{row}'].fill = green_fill
         ws_import[f'B{row}'].number_format = decimal2_format
         ws_import[f'B{row}'].fill = green_fill
@@ -175,25 +180,26 @@ def enhance_workbook():
         ws_import[f'D{row}'].fill = green_fill
         ws_import[f'E{row}'] = f'=IF(AND(A{row}<>"",B{row}<>"",C{row}<>"",D{row}<>""),"✓","")'
 
-    # Row 52: Ready to Calculate
-    ws_import['A52'] = "Ready to Calculate:"
-    ws_import['A52'].font = bold_font
-    ws_import['B52'] = '=IF(COUNTIF(E17:E50,"✓")>0,"YES - Go to Shipment Calculation tab","NO - Complete part details")'
-    ws_import['B52'].font = bold_font
+    # Row 53: Ready to Calculate
+    ws_import['A53'] = "Ready to Calculate:"
+    ws_import['A53'].font = bold_font
+    ws_import['B53'] = '=IF(COUNTIF(E18:E51,"✓")>0,"YES - Go to Shipment Calculation tab","NO - Complete part details")'
+    ws_import['B53'].font = bold_font
 
     # Instructions text box
-    ws_import['A54'] = """NEW PROCESS:
+    ws_import['A55'] = """NEW PROCESS:
 1. Enter customs entry number, vessel, date
 2. Enter total duty from CBP Box 37
 3. Enter freight invoice total (ALL charges)
-4. Enter shipment weight (KGS) and skid count
-5. Paste or type part details (Part #, Net Weight, QTY, Skids)
-6. Go to Shipment Calculation tab - review auto-calculated costs
-7. Go to ERP Upload tab - copy table and paste into ERP system
-8. Record in Historical Log for future reference"""
-    ws_import.merge_cells('A54:F62')
-    ws_import['A54'].alignment = wrap_align
-    ws_import['A54'].border = thin_border
+4. Enter shipment weight (KGS) - LBS auto-calculates
+5. Enter skid count
+6. Paste or type part details (Part #, Net Weight in LBS/M, QTY, Skids)
+7. Go to Shipment Calculation tab - review auto-calculated costs
+8. Go to ERP Upload tab - copy table and paste into ERP system
+9. Record in Historical Log for future reference"""
+    ws_import.merge_cells('A55:F63')
+    ws_import['A55'].alignment = wrap_align
+    ws_import['A55'].border = thin_border
 
     # Set column widths
     ws_import.column_dimensions['A'].width = 32
@@ -203,8 +209,8 @@ def enhance_workbook():
     ws_import.column_dimensions['E'].width = 10
     ws_import.column_dimensions['F'].width = 25
 
-    # Freeze panes at row 17
-    ws_import.freeze_panes = 'A17'
+    # Freeze panes at row 18
+    ws_import.freeze_panes = 'A18'
 
     # ============================================================================
     # MODIFY EXISTING SHEET: Shipment Calculation
@@ -222,8 +228,8 @@ def enhance_workbook():
     ws_calc['A1'].alignment = center_align
 
     # Update headers (now in row 3)
-    headers_calc = ["Part #", "Net Weight(KG)", "QTY(M)", "Total Weight(KGS)",
-                    "# of Skids", "Weight %", "Cost Allocated", "Cost/KGS", "Cost/M"]
+    headers_calc = ["Part #", "Net Weight(LBS/M)", "QTY(M)", "Total Weight(LBS)",
+                    "# of Skids", "Weight %", "Cost Allocated", "Cost/LBS", "Cost/M"]
 
     for col_idx, header in enumerate(headers_calc, start=1):
         cell = ws_calc.cell(row=3, column=col_idx)
@@ -238,22 +244,22 @@ def enhance_workbook():
         idx = row - 4
 
         # A: Part # from Import Data Entry
-        ws_calc[f'A{row}'] = f'=IFERROR(INDEX(\'Import Data Entry\'!$A$17:$A$50,{idx}),"")'
+        ws_calc[f'A{row}'] = f'=IFERROR(INDEX(\'Import Data Entry\'!$A$18:$A$51,{idx}),"")'
 
         # B: Net Weight from Import Data Entry
-        ws_calc[f'B{row}'] = f'=IFERROR(INDEX(\'Import Data Entry\'!$B$17:$B$50,{idx}),"")'
+        ws_calc[f'B{row}'] = f'=IFERROR(INDEX(\'Import Data Entry\'!$B$18:$B$51,{idx}),"")'
         ws_calc[f'B{row}'].number_format = decimal2_format
 
         # C: QTY(M) from Import Data Entry
-        ws_calc[f'C{row}'] = f'=IFERROR(INDEX(\'Import Data Entry\'!$C$17:$C$50,{idx}),"")'
+        ws_calc[f'C{row}'] = f'=IFERROR(INDEX(\'Import Data Entry\'!$C$18:$C$51,{idx}),"")'
         ws_calc[f'C{row}'].number_format = decimal3_format
 
-        # D: Total Weight calculation (Net Weight is KG per M, so just multiply by QTY in M)
+        # D: Total Weight calculation (Net Weight is LBS per M, multiply by QTY in M for total LBS)
         ws_calc[f'D{row}'] = f'=IF(B{row}="","",B{row}*C{row})'
         ws_calc[f'D{row}'].number_format = decimal2_format
 
         # E: # of Skids from Import Data Entry
-        ws_calc[f'E{row}'] = f'=IFERROR(INDEX(\'Import Data Entry\'!$D$17:$D$50,{idx}),"")'
+        ws_calc[f'E{row}'] = f'=IFERROR(INDEX(\'Import Data Entry\'!$D$18:$D$51,{idx}),"")'
         ws_calc[f'E{row}'].number_format = number_format
 
         # F: Weight % (divide by sum of all part weights, not shipment weight)
@@ -296,14 +302,14 @@ def enhance_workbook():
     ws_calc['B44'].fill = yellow_fill
 
     ws_calc['C44'] = "Total # of Skids:"
-    ws_calc['D44'] = "='Import Data Entry'!B11"
+    ws_calc['D44'] = "='Import Data Entry'!B12"
     ws_calc['D44'].number_format = number_format
     ws_calc['D44'].font = bold_font
 
-    ws_calc['A46'] = "Total weight(KGS)"
+    ws_calc['A46'] = "Total weight(LBS)"
     ws_calc['A46'].font = bold_font
-    ws_calc['C46'] = "Shipment weight KGS:"
-    ws_calc['D46'] = "='Import Data Entry'!B10"
+    ws_calc['C46'] = "Shipment weight LBS:"
+    ws_calc['D46'] = "='Import Data Entry'!B11"
     ws_calc['D46'].number_format = decimal2_format
     ws_calc['D46'].font = bold_font
     ws_calc['D46'].fill = yellow_fill
@@ -436,7 +442,8 @@ def enhance_workbook():
     wb.defined_names['NetFreight'] = DefinedName('NetFreight', attr_text="'Import Data Entry'!$B$13")
     wb.defined_names['ShipmentDate'] = DefinedName('ShipmentDate', attr_text="'Import Data Entry'!$B$6")
     wb.defined_names['VesselName'] = DefinedName('VesselName', attr_text="'Import Data Entry'!$B$5")
-    wb.defined_names['TotalSkids'] = DefinedName('TotalSkids', attr_text="'Import Data Entry'!$B$11")
+    wb.defined_names['TotalSkids'] = DefinedName('TotalSkids', attr_text="'Import Data Entry'!$B$12")
+    wb.defined_names['ShipmentWeightLBS'] = DefinedName('ShipmentWeightLBS', attr_text="'Import Data Entry'!$B$11")
 
     # ============================================================================
     # Add Real Data from Ever Eagle Shipment
@@ -448,11 +455,11 @@ def enhance_workbook():
     ws_import['B6'] = datetime(2025, 12, 17)  # Entry Date from CBP
     ws_import['B8'] = 10991.50  # Total Duty from CBP Box 37
     ws_import['B9'] = 15382.36  # Freight Invoice Total
-    ws_import['B10'] = 7821.00  # Shipment Weight (KGS) from freight invoice
-    ws_import['B11'] = 13  # Number of Skids (total from parts)
+    ws_import['B10'] = 7821.00  # Shipment Weight (KGS) from BOL/CBP
+    ws_import['B12'] = 13  # Number of Skids (total from parts)
 
     # Real parts data from Ever Eagle shipment
-    # Data matches current spreadsheet: Part #, Net Weight (KG), QTY (M), # of Skids
+    # Data matches current spreadsheet: Part #, Net Weight (LBS/M), QTY (M), # of Skids
     real_parts = [
         ["DCS-621", 7.25, 243.0, 2],
         ["DCS-623", 6.90, 252.0, 2],
@@ -460,9 +467,9 @@ def enhance_workbook():
         ["DCS-929", 7.94, 1020.6, 6],
     ]
 
-    for idx, part in enumerate(real_parts, start=17):
+    for idx, part in enumerate(real_parts, start=18):
         ws_import[f'A{idx}'] = part[0]  # Part #
-        ws_import[f'B{idx}'] = part[1]  # Net Weight (KG)
+        ws_import[f'B{idx}'] = part[1]  # Net Weight (LBS/M)
         ws_import[f'C{idx}'] = part[2]  # QTY (M)
         ws_import[f'D{idx}'] = part[3]  # # of Skids
 
@@ -499,13 +506,13 @@ def enhance_workbook():
     red_conditional = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
 
     # Status column conditional formatting
-    ws_import.conditional_formatting.add('E17:E50',
+    ws_import.conditional_formatting.add('E18:E51',
         CellIsRule(operator='equal', formula=['"✓"'], fill=green_conditional))
 
     # Ready to calculate conditional formatting
-    ws_import.conditional_formatting.add('B52',
+    ws_import.conditional_formatting.add('B53',
         CellIsRule(operator='containsText', formula=['"YES"'], fill=green_conditional))
-    ws_import.conditional_formatting.add('B52',
+    ws_import.conditional_formatting.add('B53',
         CellIsRule(operator='containsText', formula=['"NO"'], fill=red_conditional))
 
     # Save the workbook
@@ -520,8 +527,9 @@ def enhance_workbook():
     print("  • NetFreight = 'Import Data Entry'!B13")
     print("  • ShipmentDate = 'Import Data Entry'!B6")
     print("  • VesselName = 'Import Data Entry'!B5")
-    print("  • TotalSkids = 'Import Data Entry'!B11")
-    print("\nExample shipment data has been added to demonstrate workflow.")
+    print("  • TotalSkids = 'Import Data Entry'!B12")
+    print("  • ShipmentWeightLBS = 'Import Data Entry'!B11")
+    print("\nReal Ever Eagle shipment data added (all part weights in LBS/M).")
 
 if __name__ == "__main__":
     enhance_workbook()
