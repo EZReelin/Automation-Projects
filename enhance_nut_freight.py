@@ -248,16 +248,16 @@ def enhance_workbook():
         ws_calc[f'C{row}'] = f'=IFERROR(INDEX(\'Import Data Entry\'!$C$17:$C$50,{idx}),"")'
         ws_calc[f'C{row}'].number_format = decimal3_format
 
-        # D: Total Weight calculation
-        ws_calc[f'D{row}'] = f'=IF(B{row}="","",B{row}*C{row}*1000)'
+        # D: Total Weight calculation (Net Weight is KG per M, so just multiply by QTY in M)
+        ws_calc[f'D{row}'] = f'=IF(B{row}="","",B{row}*C{row})'
         ws_calc[f'D{row}'].number_format = decimal2_format
 
         # E: # of Skids from Import Data Entry
         ws_calc[f'E{row}'] = f'=IFERROR(INDEX(\'Import Data Entry\'!$D$17:$D$50,{idx}),"")'
         ws_calc[f'E{row}'].number_format = number_format
 
-        # F: Weight %
-        ws_calc[f'F{row}'] = f'=IF(D{row}="","",D{row}/$D$46)'
+        # F: Weight % (divide by sum of all part weights, not shipment weight)
+        ws_calc[f'F{row}'] = f'=IF(D{row}="","",D{row}/$D$41)'
         ws_calc[f'F{row}'].number_format = percentage_format
 
         # G: Cost Allocated
@@ -439,36 +439,44 @@ def enhance_workbook():
     wb.defined_names['TotalSkids'] = DefinedName('TotalSkids', attr_text="'Import Data Entry'!$B$11")
 
     # ============================================================================
-    # Add Example Data
+    # Add Real Data from Ever Eagle Shipment
     # ============================================================================
 
-    ws_import['B4'] = "2026-NUT-001"
-    ws_import['B5'] = "MV ASIA EXPRESS"
-    ws_import['B6'] = datetime(2026, 1, 6)
-    ws_import['B8'] = 3500.00  # Total Duty
-    ws_import['B9'] = 9750.00  # Freight Invoice Total
-    ws_import['B10'] = 12500.50  # Shipment Weight
-    ws_import['B11'] = 25  # Number of Skids
+    # Data from CBP Entry Summary and Freight Invoice
+    ws_import['B4'] = "AVZ-0154383-3"  # Entry Number from CBP
+    ws_import['B5'] = "EVER EAGLE 192E"  # Vessel from freight invoice
+    ws_import['B6'] = datetime(2025, 12, 17)  # Entry Date from CBP
+    ws_import['B8'] = 10991.50  # Total Duty from CBP Box 37
+    ws_import['B9'] = 15382.36  # Freight Invoice Total
+    ws_import['B10'] = 7821.00  # Shipment Weight (KGS) from freight invoice
+    ws_import['B11'] = 13  # Number of Skids (total from parts)
 
-    # Example parts data
-    example_parts = [
-        ["NUT-3/8-16", 0.45, 25.5, 5],
-        ["NUT-1/2-13", 0.62, 18.2, 4],
-        ["NUT-5/8-11", 0.85, 12.8, 3],
-        ["NUT-3/4-10", 1.20, 8.5, 2],
+    # Real parts data from Ever Eagle shipment
+    # Data matches current spreadsheet: Part #, Net Weight (KG), QTY (M), # of Skids
+    real_parts = [
+        ["DCS-621", 7.25, 243.0, 2],
+        ["DCS-623", 6.90, 252.0, 2],
+        ["DCS-672", 15.40, 264.6, 3],
+        ["DCS-929", 7.94, 1020.6, 6],
     ]
 
-    for idx, part in enumerate(example_parts, start=17):
-        ws_import[f'A{idx}'] = part[0]
-        ws_import[f'B{idx}'] = part[1]
-        ws_import[f'C{idx}'] = part[2]
-        ws_import[f'D{idx}'] = part[3]
+    for idx, part in enumerate(real_parts, start=17):
+        ws_import[f'A{idx}'] = part[0]  # Part #
+        ws_import[f'B{idx}'] = part[1]  # Net Weight (KG)
+        ws_import[f'C{idx}'] = part[2]  # QTY (M)
+        ws_import[f'D{idx}'] = part[3]  # # of Skids
 
-    # Add example DRM codes
-    ws_erp['B3'] = "NUT-STD"
-    ws_erp['B4'] = "NUT-STD"
-    ws_erp['B5'] = "NUT-HVY"
-    ws_erp['B6'] = "NUT-HVY"
+    # Add real DRM codes from internal form
+    drm_codes = {
+        "DCS-621": "18735",
+        "DCS-623": "18732",
+        "DCS-672": "18736",
+        "DCS-929": "18734",
+    }
+
+    # Map DRM codes to ERP sheet rows (row 3 maps to DCS-621, etc.)
+    for i, (part_num, drm) in enumerate(drm_codes.items(), start=3):
+        ws_erp[f'B{i}'] = drm
 
     # ============================================================================
     # Page Setup
