@@ -17,8 +17,8 @@ mediapipe>=0.10.0
 numpy>=1.24.0
 
 # Audio recording and transcription
-sounddevice>=0.4.6
-openai-whisper>=20231117
+sounddevice>=0.4.7
+openai-whisper>=20250101
 
 # Data validation
 jsonschema>=4.20.0
