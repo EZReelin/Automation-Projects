@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7-Day Integrated Training Protocol</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: var(--bg-secondary);
+            border-bottom: 2px solid var(--border);
+            padding: 20px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .week-selector {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .week-selector label {
+            font-weight: 600;
+        }
+
+        .week-selector select {
+            padding: 8px 12px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .nav-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .nav-tab:hover {
+            color: var(--primary-dark);
+        }
+
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        .week-schedule {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .day-card {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .day-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-color: var(--primary);
+        }
+
+        .day-card.completed {
+            border-color: var(--success);
+            background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+        }
+
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .day-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .completion-badge {
+            background: var(--success);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .day-activities {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .activity-icon {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+        }
+
+        .workout-detail {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 30px;
+            border: 2px solid var(--border);
+        }
+
+        .workout-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .workout-title {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .workout-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .exercise-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .exercise-card {
+            background: var(--bg-primary);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            transition: all 0.2s;
+        }
+
+        .exercise-card.completed {
+            border-color: var(--success);
+            background: linear-gradient(135deg, #f8fafc 0%, #f0fdf4 100%);
+        }
+
+        .exercise-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+
+        .exercise-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .exercise-details {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .exercise-input-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .input-field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .input-field label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .input-field input {
+            padding: 8px 12px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            width: 100px;
+        }
+
+        .input-field input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .timer-container {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .timer-display {
+            font-size: 48px;
+            font-weight: 700;
+            margin: 20px 0;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .timer-exercise {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .timer-btn {
+            padding: 12px 24px;
+            border: 2px solid white;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .timer-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .progress-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .metric-card {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .metric-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .metric-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .notes-section {
+            margin-top: 20px;
+        }
+
+        .notes-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .notes-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            border-color: var(--primary);
+            color: #1e40af;
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            border-color: var(--warning);
+            color: #92400e;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .week-schedule {
+                grid-template-columns: 1fr;
+            }
+
+            .timer-display {
+                font-size: 36px;
+            }
+
+            .workout-header {
+                flex-direction: column;
+                align-items: start;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .back-btn {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>7-Day Integrated Training Protocol</h1>
+            <div class="week-selector">
+                <label for="weekSelect">Training Week:</label>
+                <select id="weekSelect">
+                    <option value="1">Week 1-4 (Baseline)</option>
+                    <option value="5">Week 5-8 (Progression)</option>
+                </select>
+                <button class="btn btn-secondary" onclick="app.resetAllData()">Reset All Data</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-view="schedule">Weekly Schedule</button>
+            <button class="nav-tab" data-view="progress">Progress Tracker</button>
+        </div>
+
+        <!-- Weekly Schedule View -->
+        <div id="scheduleView" class="view active">
+            <div class="week-schedule" id="weekSchedule"></div>
+        </div>
+
+        <!-- Workout Detail View -->
+        <div id="workoutView" class="view">
+            <button class="btn btn-secondary back-btn" onclick="app.showSchedule()">← Back to Schedule</button>
+            <div id="workoutContent"></div>
+        </div>
+
+        <!-- Progress Tracker View -->
+        <div id="progressView" class="view">
+            <div class="alert alert-info">
+                <strong>4-Week Baseline Metrics:</strong> Track these weekly to assess progression
+            </div>
+
+            <div class="progress-section" id="progressMetrics"></div>
+
+            <div class="section">
+                <div class="section-title">Weekly Progress Log</div>
+                <div id="weeklyProgressLog"></div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Workout History</div>
+                <div id="workoutHistory"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const app = {
+            currentView: 'schedule',
+            currentDay: null,
+            currentWeek: 1,
+            timerInterval: null,
+            timerSeconds: 0,
+            timerRunning: false,
+            currentExercise: null,
+
+            workoutData: {
+                monday: {
+                    name: 'Monday',
+                    title: 'Lower Body (Machines)',
+                    duration: '45 min',
+                    sections: [
+                        {
+                            title: 'Warm-up (5 min)',
+                            exercises: [
+                                { name: 'Treadmill walk', details: '3.0 mph, incline 5%', type: 'warmup' },
+                                { name: 'Bodyweight squats', details: '15 reps', type: 'warmup' },
+                                { name: 'Leg swings', details: '10 each direction', type: 'warmup' }
+                            ]
+                        },
+                        {
+                            title: 'Main Work (30 min)',
+                            exercises: [
+                                { name: 'Leg Press', details: '4 sets x 12 reps, 90 sec rest', sets: 4, reps: 12, weight: true },
+                                { name: 'Lying Leg Curl', details: '3 sets x 15 reps, 60 sec rest', sets: 3, reps: 15, weight: true },
+                                { name: 'Seated Leg Extension', details: '3 sets x 15 reps, 60 sec rest', sets: 3, reps: 15, weight: true },
+                                { name: 'Standing Calf Raise (machine)', details: '3 sets x 20 reps, 45 sec rest', sets: 3, reps: 20, weight: true }
+                            ]
+                        },
+                        {
+                            title: 'Daily Core (10 min)',
+                            isCore: true
+                        }
+                    ]
+                },
+                tuesday: {
+                    name: 'Tuesday',
+                    title: '5K Run - Interval',
+                    duration: '40-50 min',
+                    sections: [
+                        {
+                            title: 'Interval Session (30-40 min)',
+                            exercises: [
+                                { name: '5 min walk/jog warm-up', details: 'Easy pace', type: 'run' },
+                                { name: 'Intervals', details: '8 x (2 min at 5K goal pace / 1 min recovery jog)', type: 'run', note: 'Progression: Increase from 6 to 10 intervals over 4 weeks' },
+                                { name: '5 min cool-down walk', details: 'Easy pace', type: 'run' }
+                            ],
+                            tracking: { time: true, distance: true, intervals: true }
+                        },
+                        {
+                            title: 'Daily Core (10 min)',
+                            isCore: true
+                        }
+                    ]
+                },
+                wednesday: {
+                    name: 'Wednesday',
+                    title: 'Upper Pull + Posterior (Cable/Machine)',
+                    duration: '45 min',
+                    sections: [
+                        {
+                            title: 'Warm-up (5 min)',
+                            exercises: [
+                                { name: 'Rowing machine or bike', details: 'Light resistance', type: 'warmup' },
+                                { name: 'Band pull-aparts', details: '20 reps', type: 'warmup' },
+                                { name: 'Scapular wall slides', details: '10 reps', type: 'warmup' }
+                            ]
+                        },
+                        {
+                            title: 'Main Work (30 min)',
+                            exercises: [
+                                { name: 'Cable Lat Pulldown (wide grip)', details: '4 sets x 10 reps, 90 sec rest', sets: 4, reps: 10, weight: true },
+                                { name: 'Cable Seated Row (neutral grip)', details: '4 sets x 12 reps, 75 sec rest', sets: 4, reps: 12, weight: true },
+                                { name: 'Rear Delt Machine OR Cable Reverse Fly', details: '3 sets x 15 reps, 60 sec rest', sets: 3, reps: 15, weight: true },
+                                { name: 'Cable Face Pull', details: '3 sets x 15 reps, 60 sec rest', sets: 3, reps: 15, weight: true },
+                                { name: 'Back Extension Machine', details: '3 sets x 12 reps, 60 sec rest', sets: 3, reps: 12, weight: true }
+                            ]
+                        },
+                        {
+                            title: 'Daily Core (10 min)',
+                            isCore: true
+                        }
+                    ]
+                },
+                thursday: {
+                    name: 'Thursday',
+                    title: '5K Run - Distance',
+                    duration: '45-55 min',
+                    sections: [
+                        {
+                            title: 'Distance Run (35-45 min)',
+                            exercises: [
+                                { name: 'Continuous run', details: 'Conversational pace', type: 'run', note: 'Week 1-2: 3.5 km | Week 3-4: 4 km | Week 5-6: 4.5 km | Week 7+: Full 5K at target pace' }
+                            ],
+                            tracking: { time: true, distance: true, pace: true }
+                        },
+                        {
+                            title: 'Daily Core (10 min)',
+                            isCore: true
+                        }
+                    ]
+                },
+                friday: {
+                    name: 'Friday',
+                    title: 'Lower Body + Lateral Stability',
+                    duration: '45 min',
+                    sections: [
+                        {
+                            title: 'Warm-up (5 min)',
+                            exercises: [
+                                { name: 'Elliptical or treadmill walk', details: 'Light pace', type: 'warmup' },
+                                { name: 'Lateral band walks', details: '10 per side', type: 'warmup' },
+                                { name: 'Glute bridges', details: '15 reps', type: 'warmup' }
+                            ]
+                        },
+                        {
+                            title: 'Main Work (30 min)',
+                            exercises: [
+                                { name: 'Leg Press (feet high/wide)', details: '4 sets x 10 reps, 90 sec rest', sets: 4, reps: 10, weight: true },
+                                { name: 'Seated Leg Curl', details: '3 sets x 12 reps, 60 sec rest', sets: 3, reps: 12, weight: true },
+                                { name: 'Leg Extension (tempo: 3 sec down)', details: '3 sets x 10 reps, 60 sec rest', sets: 3, reps: 10, weight: true },
+                                { name: 'Cable Kickback (glute)', details: '3 sets x 15 reps per leg, 45 sec rest', sets: 3, reps: 15, weight: true },
+                                { name: 'Cable Lateral Raise (light)', details: '3 sets x 15 reps, 45 sec rest', sets: 3, reps: 15, weight: true },
+                                { name: 'Seated Calf Raise', details: '3 sets x 20 reps, 45 sec rest', sets: 3, reps: 20, weight: true }
+                            ]
+                        },
+                        {
+                            title: 'Daily Core (10 min)',
+                            isCore: true
+                        }
+                    ]
+                },
+                saturday: {
+                    name: 'Saturday',
+                    title: '5K Run - Tempo OR Active Recovery',
+                    duration: '35-50 min',
+                    sections: [
+                        {
+                            title: 'Tempo OR Recovery (25-40 min)',
+                            exercises: [
+                                { name: 'Tempo Option', details: '10 min easy, 15 min at slightly faster than 5K pace, 5 min easy', type: 'run' },
+                                { name: 'Recovery Option', details: '25 min easy walk/jog if fatigued', type: 'run' }
+                            ],
+                            tracking: { time: true, distance: true, type: true }
+                        },
+                        {
+                            title: 'Daily Core (10 min)',
+                            isCore: true
+                        }
+                    ]
+                },
+                sunday: {
+                    name: 'Sunday',
+                    title: 'Core + Light Mobility',
+                    duration: '15 min',
+                    sections: [
+                        {
+                            title: 'Daily Core (10 min)',
+                            isCore: true
+                        },
+                        {
+                            title: 'Light Mobility (5 min)',
+                            exercises: [
+                                { name: 'Cat-Cow', details: '10 reps', type: 'mobility' },
+                                { name: 'Thread the Needle', details: '8 reps per side', type: 'mobility' },
+                                { name: 'Child\'s Pose', details: '1 min hold', type: 'mobility' },
+                                { name: 'Hip flexor stretch', details: '30 sec per side', type: 'mobility' }
+                            ]
+                        }
+                    ]
+                }
+            },
+
+            coreRoutine: {
+                baseline: [
+                    { name: 'Front Plank', sets: 3, duration: 45, rest: 20, type: 'time', progression: 60 },
+                    { name: 'Side Plank', sets: 2, duration: 30, rest: 20, type: 'time_per_side', progression: 45 },
+                    { name: 'Pallof Press (cable)', sets: 3, reps: 12, rest: 20, type: 'reps_per_side', progression: 15 },
+                    { name: 'Hanging Knee Raise', sets: 3, reps: 10, rest: 30, type: 'reps', progression: 12 },
+                    { name: 'Cable Rotation', sets: 2, reps: 12, rest: 20, type: 'reps_per_side', progression: 15 },
+                    { name: 'Bicycle Crunch', sets: 2, reps: 20, rest: 20, type: 'reps', progression: 25 }
+                ]
+            },
+
+            init() {
+                this.loadData();
+                this.setupEventListeners();
+                this.renderWeekSchedule();
+                this.updateWeekDisplay();
+            },
+
+            setupEventListeners() {
+                document.querySelectorAll('.nav-tab').forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                        e.target.classList.add('active');
+                        const view = e.target.dataset.view;
+                        this.showView(view);
+                    });
+                });
+
+                document.getElementById('weekSelect').addEventListener('change', (e) => {
+                    this.currentWeek = parseInt(e.target.value);
+                    this.saveData();
+                    this.updateWeekDisplay();
+                    if (this.currentDay) {
+                        this.showWorkout(this.currentDay);
+                    }
+                });
+            },
+
+            showView(view) {
+                document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+                if (view === 'schedule') {
+                    document.getElementById('scheduleView').classList.add('active');
+                    this.renderWeekSchedule();
+                } else if (view === 'progress') {
+                    document.getElementById('progressView').classList.add('active');
+                    this.renderProgress();
+                }
+                this.currentView = view;
+            },
+
+            renderWeekSchedule() {
+                const container = document.getElementById('weekSchedule');
+                const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+                const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+
+                container.innerHTML = days.map(day => {
+                    const workout = this.workoutData[day];
+                    const completed = this.isWorkoutCompleted(day);
+                    const isToday = day === today;
+
+                    return `
+                        <div class="day-card ${completed ? 'completed' : ''}" onclick="app.showWorkout('${day}')">
+                            <div class="day-header">
+                                <div class="day-name">${workout.name}${isToday ? ' 🔵' : ''}</div>
+                                ${completed ? '<div class="completion-badge">✓ Done</div>' : ''}
+                            </div>
+                            <div class="day-activities">
+                                <div class="activity-item">
+                                    <div class="activity-icon"></div>
+                                    <span>${workout.title}</span>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon"></div>
+                                    <span>Core Work (10 min)</span>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon"></div>
+                                    <span>Duration: ${workout.duration}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            },
+
+            showWorkout(day) {
+                this.currentDay = day;
+                document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+                document.getElementById('workoutView').classList.add('active');
+                this.renderWorkout(day);
+            },
+
+            showSchedule() {
+                this.currentDay = null;
+                this.stopTimer();
+                document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+                document.getElementById('scheduleView').classList.add('active');
+                this.renderWeekSchedule();
+            },
+
+            renderWorkout(day) {
+                const workout = this.workoutData[day];
+                const container = document.getElementById('workoutContent');
+                const date = new Date().toISOString().split('T')[0];
+                const workoutKey = `${day}_${date}`;
+
+                let html = `
+                    <div class="workout-detail">
+                        <div class="workout-header">
+                            <div>
+                                <div class="workout-title">${workout.name}: ${workout.title}</div>
+                                <div style="color: var(--text-secondary)">Duration: ${workout.duration}</div>
+                            </div>
+                            <div class="workout-actions">
+                                <button class="btn btn-success" onclick="app.completeWorkout('${day}')">
+                                    ✓ Mark Workout Complete
+                                </button>
+                            </div>
+                        </div>
+                `;
+
+                workout.sections.forEach((section, sectionIdx) => {
+                    if (section.isCore) {
+                        html += this.renderCoreSection(day);
+                    } else {
+                        html += `
+                            <div class="section">
+                                <div class="section-title">${section.title}</div>
+                                ${section.tracking ? this.renderTrackingInputs(day, sectionIdx, section.tracking) : ''}
+                                <div class="exercise-list">
+                                    ${section.exercises.map((exercise, exIdx) => this.renderExercise(day, sectionIdx, exIdx, exercise)).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+
+                html += `
+                    <div class="notes-section">
+                        <div class="section-title">Workout Notes</div>
+                        <textarea class="notes-textarea" id="workoutNotes" placeholder="Add notes about today's workout, dart practice impact, grip fatigue, etc.">${this.getWorkoutNotes(day) || ''}</textarea>
+                        <button class="btn btn-primary" style="margin-top: 10px" onclick="app.saveWorkoutNotes('${day}')">Save Notes</button>
+                    </div>
+                </div>
+                `;
+
+                container.innerHTML = html;
+            },
+
+            renderCoreSection(day) {
+                const isProgression = this.currentWeek >= 5;
+                const routine = this.coreRoutine.baseline;
+
+                let html = `
+                    <div class="section">
+                        <div class="section-title">
+                            Daily Core Routine (10 min)
+                            ${isProgression ? '<span style="color: var(--warning); font-size: 14px; margin-left: 10px;">Week 5-8 Progression</span>' : ''}
+                        </div>
+                        <div class="timer-container" id="coreTimer">
+                            <div class="timer-exercise" id="timerExercise">Ready to start</div>
+                            <div class="timer-display" id="timerDisplay">00:00</div>
+                            <div class="timer-controls">
+                                <button class="timer-btn" onclick="app.startCoreTimer()">Start Timer</button>
+                                <button class="timer-btn" onclick="app.pauseTimer()">Pause</button>
+                                <button class="timer-btn" onclick="app.resetTimer()">Reset</button>
+                                <button class="timer-btn" onclick="app.nextExercise()">Next Exercise</button>
+                            </div>
+                        </div>
+                        <div class="exercise-list">
+                            ${routine.map((exercise, idx) => this.renderCoreExercise(day, idx, exercise, isProgression)).join('')}
+                        </div>
+                        <div class="alert alert-warning" style="margin-top: 15px">
+                            <strong>Adjustments for High Dart Volume:</strong> If dart practice exceeds 2 hours or competition day, reduce core to 5 min: execute only Front Plank (2 sets), Pallof Press (2 sets), Bicycle Crunch (1 set)
+                        </div>
+                    </div>
+                `;
+
+                return html;
+            },
+
+            renderCoreExercise(day, idx, exercise, isProgression) {
+                const completed = this.isCoreExerciseCompleted(day, idx);
+                const value = isProgression ? exercise.progression : (exercise.duration || exercise.reps);
+
+                let details = '';
+                if (exercise.type === 'time') {
+                    details = `${exercise.sets} sets x ${value} sec, ${exercise.rest} sec rest`;
+                } else if (exercise.type === 'time_per_side') {
+                    details = `${exercise.sets} sets x ${value} sec per side, ${exercise.rest} sec rest`;
+                } else if (exercise.type === 'reps') {
+                    details = `${exercise.sets} sets x ${value} reps, ${exercise.rest} sec rest`;
+                } else if (exercise.type === 'reps_per_side') {
+                    details = `${exercise.sets} sets x ${value} reps per side, ${exercise.rest} sec rest`;
+                }
+
+                return `
+                    <div class="exercise-card ${completed ? 'completed' : ''}" id="core_${day}_${idx}">
+                        <div class="exercise-header">
+                            <div>
+                                <div class="exercise-name">${exercise.name}</div>
+                                <div class="exercise-details">${details}</div>
+                            </div>
+                            <label class="checkbox-label">
+                                <input type="checkbox" ${completed ? 'checked' : ''}
+                                    onchange="app.toggleCoreExercise('${day}', ${idx})">
+                                <span>Done</span>
+                            </label>
+                        </div>
+                    </div>
+                `;
+            },
+
+            renderExercise(day, sectionIdx, exIdx, exercise) {
+                const completed = this.isExerciseCompleted(day, sectionIdx, exIdx);
+                const exerciseData = this.getExerciseData(day, sectionIdx, exIdx) || {};
+
+                let inputsHtml = '';
+                if (exercise.weight) {
+                    inputsHtml = `
+                        <div class="exercise-input-group">
+                            <div class="input-field">
+                                <label>Weight (lbs)</label>
+                                <input type="number" value="${exerciseData.weight || ''}"
+                                    onchange="app.saveExerciseData('${day}', ${sectionIdx}, ${exIdx}, 'weight', this.value)">
+                            </div>
+                            <div class="input-field">
+                                <label>Reps Completed</label>
+                                <input type="text" value="${exerciseData.repsCompleted || ''}"
+                                    placeholder="e.g., 12,12,11,10"
+                                    onchange="app.saveExerciseData('${day}', ${sectionIdx}, ${exIdx}, 'repsCompleted', this.value)">
+                            </div>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="exercise-card ${completed ? 'completed' : ''}" id="ex_${day}_${sectionIdx}_${exIdx}">
+                        <div class="exercise-header">
+                            <div>
+                                <div class="exercise-name">${exercise.name}</div>
+                                <div class="exercise-details">${exercise.details}</div>
+                                ${exercise.note ? `<div class="exercise-details" style="color: var(--warning); margin-top: 5px;">📌 ${exercise.note}</div>` : ''}
+                            </div>
+                            <label class="checkbox-label">
+                                <input type="checkbox" ${completed ? 'checked' : ''}
+                                    onchange="app.toggleExercise('${day}', ${sectionIdx}, ${exIdx})">
+                                <span>Done</span>
+                            </label>
+                        </div>
+                        ${inputsHtml}
+                    </div>
+                `;
+            },
+
+            renderTrackingInputs(day, sectionIdx, tracking) {
+                const data = this.getTrackingData(day, sectionIdx) || {};
+                let html = '<div class="exercise-input-group" style="margin-bottom: 15px; background: white; padding: 15px; border-radius: 8px;">';
+
+                if (tracking.time) {
+                    html += `
+                        <div class="input-field">
+                            <label>Time (min:sec)</label>
+                            <input type="text" value="${data.time || ''}" placeholder="35:24"
+                                onchange="app.saveTrackingData('${day}', ${sectionIdx}, 'time', this.value)">
+                        </div>
+                    `;
+                }
+                if (tracking.distance) {
+                    html += `
+                        <div class="input-field">
+                            <label>Distance (km)</label>
+                            <input type="number" step="0.1" value="${data.distance || ''}"
+                                onchange="app.saveTrackingData('${day}', ${sectionIdx}, 'distance', this.value)">
+                        </div>
+                    `;
+                }
+                if (tracking.pace) {
+                    html += `
+                        <div class="input-field">
+                            <label>Avg Pace (min/km)</label>
+                            <input type="text" value="${data.pace || ''}" placeholder="6:30"
+                                onchange="app.saveTrackingData('${day}', ${sectionIdx}, 'pace', this.value)">
+                        </div>
+                    `;
+                }
+                if (tracking.intervals) {
+                    html += `
+                        <div class="input-field">
+                            <label># of Intervals</label>
+                            <input type="number" value="${data.intervals || ''}"
+                                onchange="app.saveTrackingData('${day}', ${sectionIdx}, 'intervals', this.value)">
+                        </div>
+                    `;
+                }
+                if (tracking.type) {
+                    html += `
+                        <div class="input-field">
+                            <label>Type</label>
+                            <select onchange="app.saveTrackingData('${day}', ${sectionIdx}, 'type', this.value)">
+                                <option value="">Select...</option>
+                                <option value="tempo" ${data.type === 'tempo' ? 'selected' : ''}>Tempo</option>
+                                <option value="recovery" ${data.type === 'recovery' ? 'selected' : ''}>Recovery</option>
+                            </select>
+                        </div>
+                    `;
+                }
+
+                html += '</div>';
+                return html;
+            },
+
+            startCoreTimer() {
+                if (this.timerRunning) return;
+
+                const routine = this.coreRoutine.baseline;
+                if (!this.currentExercise) {
+                    this.currentExercise = { index: 0, set: 1, phase: 'work' };
+                }
+
+                this.timerRunning = true;
+                this.updateTimerDisplay();
+
+                this.timerInterval = setInterval(() => {
+                    this.timerSeconds++;
+                    this.updateTimerDisplay();
+
+                    const exercise = routine[this.currentExercise.index];
+                    const isProgression = this.currentWeek >= 5;
+                    const targetTime = exercise.type.includes('time')
+                        ? (isProgression ? exercise.progression : exercise.duration)
+                        : exercise.rest;
+
+                    if (this.currentExercise.phase === 'work' && this.timerSeconds >= targetTime) {
+                        this.completeSet();
+                    } else if (this.currentExercise.phase === 'rest' && this.timerSeconds >= exercise.rest) {
+                        this.nextSet();
+                    }
+                }, 1000);
+            },
+
+            completeSet() {
+                const exercise = this.coreRoutine.baseline[this.currentExercise.index];
+
+                if (this.currentExercise.set < exercise.sets) {
+                    this.currentExercise.phase = 'rest';
+                    this.timerSeconds = 0;
+                    this.updateTimerDisplay();
+                } else {
+                    this.nextExercise();
+                }
+            },
+
+            nextSet() {
+                this.currentExercise.set++;
+                this.currentExercise.phase = 'work';
+                this.timerSeconds = 0;
+                this.updateTimerDisplay();
+            },
+
+            nextExercise() {
+                const routine = this.coreRoutine.baseline;
+                this.currentExercise.index++;
+
+                if (this.currentExercise.index >= routine.length) {
+                    this.stopTimer();
+                    alert('Core routine complete! Great work! 💪');
+                    return;
+                }
+
+                this.currentExercise.set = 1;
+                this.currentExercise.phase = 'work';
+                this.timerSeconds = 0;
+                this.updateTimerDisplay();
+            },
+
+            pauseTimer() {
+                this.timerRunning = false;
+                if (this.timerInterval) {
+                    clearInterval(this.timerInterval);
+                    this.timerInterval = null;
+                }
+            },
+
+            resetTimer() {
+                this.stopTimer();
+                this.currentExercise = null;
+                this.timerSeconds = 0;
+                document.getElementById('timerDisplay').textContent = '00:00';
+                document.getElementById('timerExercise').textContent = 'Ready to start';
+            },
+
+            stopTimer() {
+                this.pauseTimer();
+                this.currentExercise = null;
+                this.timerSeconds = 0;
+            },
+
+            updateTimerDisplay() {
+                if (!this.currentExercise) return;
+
+                const routine = this.coreRoutine.baseline;
+                const exercise = routine[this.currentExercise.index];
+                const isProgression = this.currentWeek >= 5;
+
+                const minutes = Math.floor(this.timerSeconds / 60);
+                const seconds = this.timerSeconds % 60;
+                document.getElementById('timerDisplay').textContent =
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+                let status = '';
+                if (this.currentExercise.phase === 'work') {
+                    const targetTime = exercise.type.includes('time')
+                        ? (isProgression ? exercise.progression : exercise.duration)
+                        : 0;
+                    status = `${exercise.name} - Set ${this.currentExercise.set}/${exercise.sets}`;
+                    if (exercise.type.includes('time')) {
+                        status += ` (${targetTime}s)`;
+                    }
+                } else {
+                    status = `Rest - ${exercise.rest}s`;
+                }
+
+                document.getElementById('timerExercise').textContent = status;
+            },
+
+            toggleExercise(day, sectionIdx, exIdx) {
+                const key = `exercise_${day}_${sectionIdx}_${exIdx}`;
+                const completed = this.data.completedExercises[key] || false;
+                this.data.completedExercises[key] = !completed;
+                this.saveData();
+
+                const element = document.getElementById(`ex_${day}_${sectionIdx}_${exIdx}`);
+                if (element) {
+                    element.classList.toggle('completed');
+                }
+            },
+
+            toggleCoreExercise(day, idx) {
+                const key = `core_${day}_${idx}`;
+                const completed = this.data.completedExercises[key] || false;
+                this.data.completedExercises[key] = !completed;
+                this.saveData();
+
+                const element = document.getElementById(`core_${day}_${idx}`);
+                if (element) {
+                    element.classList.toggle('completed');
+                }
+            },
+
+            saveExerciseData(day, sectionIdx, exIdx, field, value) {
+                const key = `exerciseData_${day}_${sectionIdx}_${exIdx}`;
+                if (!this.data.exerciseData[key]) {
+                    this.data.exerciseData[key] = {};
+                }
+                this.data.exerciseData[key][field] = value;
+                this.saveData();
+            },
+
+            saveTrackingData(day, sectionIdx, field, value) {
+                const key = `tracking_${day}_${sectionIdx}`;
+                if (!this.data.trackingData[key]) {
+                    this.data.trackingData[key] = {};
+                }
+                this.data.trackingData[key][field] = value;
+                this.saveData();
+            },
+
+            getExerciseData(day, sectionIdx, exIdx) {
+                const key = `exerciseData_${day}_${sectionIdx}_${exIdx}`;
+                return this.data.exerciseData[key];
+            },
+
+            getTrackingData(day, sectionIdx) {
+                const key = `tracking_${day}_${sectionIdx}`;
+                return this.data.trackingData[key];
+            },
+
+            isExerciseCompleted(day, sectionIdx, exIdx) {
+                const key = `exercise_${day}_${sectionIdx}_${exIdx}`;
+                return this.data.completedExercises[key] || false;
+            },
+
+            isCoreExerciseCompleted(day, idx) {
+                const key = `core_${day}_${idx}`;
+                return this.data.completedExercises[key] || false;
+            },
+
+            isWorkoutCompleted(day) {
+                const date = new Date().toISOString().split('T')[0];
+                const key = `workout_${day}_${date}`;
+                return this.data.completedWorkouts[key] || false;
+            },
+
+            completeWorkout(day) {
+                const date = new Date().toISOString().split('T')[0];
+                const key = `workout_${day}_${date}`;
+                this.data.completedWorkouts[key] = true;
+
+                // Log workout history
+                this.data.workoutHistory.push({
+                    day: day,
+                    date: date,
+                    week: this.currentWeek,
+                    workout: this.workoutData[day].title,
+                    notes: this.getWorkoutNotes(day)
+                });
+
+                this.saveData();
+                alert('Workout marked as complete! Great job! 🎉');
+                this.showSchedule();
+            },
+
+            saveWorkoutNotes(day) {
+                const notes = document.getElementById('workoutNotes').value;
+                const date = new Date().toISOString().split('T')[0];
+                const key = `notes_${day}_${date}`;
+                this.data.workoutNotes[key] = notes;
+                this.saveData();
+                alert('Notes saved!');
+            },
+
+            getWorkoutNotes(day) {
+                const date = new Date().toISOString().split('T')[0];
+                const key = `notes_${day}_${date}`;
+                return this.data.workoutNotes[key] || '';
+            },
+
+            renderProgress() {
+                const metricsContainer = document.getElementById('progressMetrics');
+                const workoutHistory = document.getElementById('workoutHistory');
+
+                // Calculate metrics
+                const totalWorkouts = this.data.workoutHistory.length;
+                const thisWeekWorkouts = this.data.workoutHistory.filter(w => {
+                    const workoutDate = new Date(w.date);
+                    const today = new Date();
+                    const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    return workoutDate >= weekAgo;
+                }).length;
+
+                metricsContainer.innerHTML = `
+                    <div class="metric-card">
+                        <div class="metric-title">Current Training Week</div>
+                        <div class="metric-value">${this.currentWeek >= 5 ? '5-8' : '1-4'}</div>
+                        <div class="metric-label">${this.currentWeek >= 5 ? 'Progression Phase' : 'Baseline Phase'}</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-title">Total Workouts Completed</div>
+                        <div class="metric-value">${totalWorkouts}</div>
+                        <div class="metric-label">All time</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-title">This Week's Workouts</div>
+                        <div class="metric-value">${thisWeekWorkouts}</div>
+                        <div class="metric-label">Last 7 days</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-title">Weekly Target</div>
+                        <div class="metric-value">7</div>
+                        <div class="metric-label">Days per week</div>
+                    </div>
+                `;
+
+                // Render workout history
+                const recentWorkouts = [...this.data.workoutHistory].reverse().slice(0, 20);
+                if (recentWorkouts.length === 0) {
+                    workoutHistory.innerHTML = '<p style="color: var(--text-secondary)">No workouts completed yet. Start your first workout!</p>';
+                } else {
+                    workoutHistory.innerHTML = `
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            ${recentWorkouts.map(w => `
+                                <div class="exercise-card">
+                                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                                        <div>
+                                            <div class="exercise-name">${w.day.charAt(0).toUpperCase() + w.day.slice(1)}: ${w.workout}</div>
+                                            <div class="exercise-details">${w.date} • Week ${w.week}</div>
+                                            ${w.notes ? `<div class="exercise-details" style="margin-top: 5px">${w.notes}</div>` : ''}
+                                        </div>
+                                        <div class="completion-badge">✓</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+            },
+
+            updateWeekDisplay() {
+                const weekSelector = document.getElementById('weekSelect');
+                weekSelector.value = this.currentWeek >= 5 ? '5' : '1';
+            },
+
+            loadData() {
+                const saved = localStorage.getItem('workoutTrackerData');
+                if (saved) {
+                    this.data = JSON.parse(saved);
+                    this.currentWeek = this.data.currentWeek || 1;
+                } else {
+                    this.data = {
+                        currentWeek: 1,
+                        completedExercises: {},
+                        completedWorkouts: {},
+                        exerciseData: {},
+                        trackingData: {},
+                        workoutNotes: {},
+                        workoutHistory: []
+                    };
+                }
+            },
+
+            saveData() {
+                this.data.currentWeek = this.currentWeek;
+                localStorage.setItem('workoutTrackerData', JSON.stringify(this.data));
+            },
+
+            resetAllData() {
+                if (confirm('Are you sure you want to reset ALL workout data? This cannot be undone.')) {
+                    localStorage.removeItem('workoutTrackerData');
+                    this.data = {
+                        currentWeek: 1,
+                        completedExercises: {},
+                        completedWorkouts: {},
+                        exerciseData: {},
+                        trackingData: {},
+                        workoutNotes: {},
+                        workoutHistory: []
+                    };
+                    this.currentWeek = 1;
+                    this.saveData();
+                    this.showSchedule();
+                    alert('All data has been reset.');
+                }
+            }
+        };
+
+        // Initialize app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+    </script>
+</body>
+</html>
