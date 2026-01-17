@@ -1,0 +1,105 @@
+# Scolia Comprehensive Scraper Configuration
+# ===========================================
+
+# Scolia Web Client Settings
+scolia:
+  base_url: "https://web.scolia.app"
+
+  # Authentication (can also use environment variables SCOLIA_USERNAME and SCOLIA_PASSWORD)
+  # username: "your_email@example.com"
+  # password: "your_password"
+
+  # Browser settings
+  headless: true  # Run browser in headless mode (no GUI)
+  timeout: 20  # Page load timeout in seconds
+  implicit_wait: 10  # Implicit wait time for elements
+
+# Scraping Configuration
+scraping:
+  # Game types to scrape
+  # Options: x01, cricket, around_the_world, bobs_27, shanghai
+  game_types:
+    - x01
+    - cricket
+    - around_the_world
+    - bobs_27
+    - shanghai
+
+  # Incremental scraping - only scrape new matches since last run
+  incremental: true
+
+  # Rate limiting (seconds between requests)
+  rate_limits:
+    between_pages: 1.0
+    between_matches: 0.5
+    between_game_types: 2.0
+
+  # Retry configuration
+  retry_attempts: 3
+  retry_delay: 5  # Initial retry delay in seconds (exponential backoff)
+
+  # Extract detailed data
+  extract_legs: true  # Extract leg-level data
+  extract_turns: true  # Extract turn-by-turn throw data
+  extract_charts: true  # Extract chart numerical data
+
+# Data Export Settings
+export:
+  # Export formats: json, csv, or both
+  format: "both"
+
+  # Output directory
+  output_dir: "./data/scolia"
+
+  # File naming
+  filename_pattern: "scolia_data_{timestamp}"
+
+  # JSON export settings
+  json:
+    indent: 2
+    include_metadata: true
+
+  # CSV export settings
+  csv:
+    encoding: "utf-8"
+    separate_files: true  # Create separate CSV files for different data types
+    include_headers: true
+
+# Logging Configuration
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+
+  # Log to file
+  file:
+    enabled: true
+    path: "./logs/scolia_scraper.log"
+    max_bytes: 10485760  # 10 MB
+    backup_count: 5
+
+  # Log to console
+  console:
+    enabled: true
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# State Management
+state:
+  # File to track scraping progress (for incremental scraping)
+  state_file: "./data/scolia/scraper_state.json"
+
+  # Save state after each game type
+  save_frequently: true
+
+# Advanced Settings
+advanced:
+  # Maximum matches to process per game type (0 = unlimited)
+  max_matches_per_type: 0
+
+  # Screenshot on error
+  screenshot_on_error: true
+  screenshot_dir: "./logs/screenshots"
+
+  # Browser user agent
+  user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+  # Session timeout in seconds
+  session_timeout: 3600
