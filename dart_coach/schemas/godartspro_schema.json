@@ -1,0 +1,325 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "godartspro_session_schema",
+  "title": "GoDartsPro Training Session Schema",
+  "description": "Schema for dart training sessions captured from GoDartsPro platform",
+  "type": "object",
+  "required": ["session_id", "timestamp", "data_source", "scrape_metadata"],
+  "properties": {
+    "session_id": {
+      "type": "string",
+      "description": "Unique identifier for the session",
+      "pattern": "^godartspro_[0-9]{8}_[0-9]{6}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of session"
+    },
+    "data_source": {
+      "type": "string",
+      "const": "godartspro",
+      "description": "Identifies data as from GoDartsPro (training environment)"
+    },
+    "context": {
+      "type": "string",
+      "const": "practice",
+      "description": "GoDartsPro is exclusively practice/training data"
+    },
+    "scrape_metadata": {
+      "type": "object",
+      "description": "Metadata about the scraping process",
+      "required": ["scrape_timestamp", "scraper_version"],
+      "properties": {
+        "scrape_timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "scraper_version": {
+          "type": "string"
+        },
+        "last_processed_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Last date processed to enable incremental scraping"
+        }
+      }
+    },
+    "dashboard_statistics": {
+      "type": "object",
+      "description": "Overall statistics from the GoDartsPro dashboard",
+      "properties": {
+        "total_sessions": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_drills_completed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "overall_average": {
+          "type": "number",
+          "minimum": 0
+        },
+        "best_average": {
+          "type": "number",
+          "minimum": 0
+        },
+        "total_practice_hours": {
+          "type": "number",
+          "minimum": 0
+        },
+        "current_streak": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "longest_streak": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "additional_stats": {
+          "type": "object",
+          "description": "Any additional dashboard statistics available",
+          "additionalProperties": true
+        }
+      }
+    },
+    "training_log_entry": {
+      "type": "object",
+      "description": "Entry from the training log showing individual drill sessions",
+      "properties": {
+        "drill_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "drill_name": {
+          "type": "string",
+          "description": "Name of the training drill"
+        },
+        "drill_type": {
+          "type": "string",
+          "enum": ["x01", "cricket", "around_the_clock", "doubles", "checkout", "scoring", "other"],
+          "description": "Type of drill performed"
+        },
+        "completion_status": {
+          "type": "string",
+          "enum": ["completed", "partial", "abandoned"],
+          "description": "Whether the drill was completed"
+        },
+        "drill_summary": {
+          "type": "object",
+          "description": "Summary statistics visible in training log",
+          "properties": {
+            "score": {
+              "type": "number"
+            },
+            "duration_minutes": {
+              "type": "number"
+            },
+            "darts_thrown": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    "session_statistics": {
+      "type": "object",
+      "description": "Detailed statistics from 'Your Stats' ribbon for a specific session",
+      "properties": {
+        "session_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "individual_session_stats": {
+          "type": "array",
+          "description": "Statistics for individual sessions listed by date",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string",
+                "format": "date"
+              },
+              "game_number": {
+                "type": "integer",
+                "description": "Game number if multiple games on same date"
+              },
+              "metrics": {
+                "type": "object",
+                "properties": {
+                  "three_dart_average": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 180
+                  },
+                  "first_nine_average": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 180
+                  },
+                  "total_darts": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "total_score": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "checkout_percentage": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "checkout_attempts": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "checkouts_hit": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "highest_score": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 180
+                  },
+                  "highest_checkout": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 170
+                  },
+                  "doubles_hit": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "doubles_missed": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "doubles_percentage": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "triples_hit": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "triples_missed": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "triples_percentage": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "scoring_breakdown": {
+                    "type": "object",
+                    "properties": {
+                      "180s": {"type": "integer"},
+                      "171_179": {"type": "integer"},
+                      "140_170": {"type": "integer"},
+                      "100_139": {"type": "integer"},
+                      "81_99": {"type": "integer"},
+                      "60_80": {"type": "integer"},
+                      "41_59": {"type": "integer"},
+                      "21_40": {"type": "integer"},
+                      "0_20": {"type": "integer"}
+                    }
+                  },
+                  "additional_metrics": {
+                    "type": "object",
+                    "description": "Any additional metrics available",
+                    "additionalProperties": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "averaged_statistics": {
+          "type": "object",
+          "description": "Averaged statistics displayed at the top of the stats ribbon",
+          "properties": {
+            "period": {
+              "type": "string",
+              "description": "Time period for averaging (e.g., 'last 7 days', 'all time')"
+            },
+            "number_of_sessions": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "avg_three_dart_average": {
+              "type": "number",
+              "minimum": 0
+            },
+            "avg_first_nine": {
+              "type": "number",
+              "minimum": 0
+            },
+            "avg_checkout_percentage": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "total_darts_thrown": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "best_three_dart_average": {
+              "type": "number",
+              "minimum": 0
+            },
+            "best_checkout_percentage": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "overall_doubles_percentage": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "overall_triples_percentage": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "total_180s": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "total_140_plus": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "total_100_plus": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "raw_data": {
+      "type": "object",
+      "description": "Raw scraped data for debugging and validation",
+      "properties": {
+        "dashboard_html": {
+          "type": "string",
+          "description": "Raw HTML from dashboard (optional, for debugging)"
+        },
+        "stats_ribbon_html": {
+          "type": "string",
+          "description": "Raw HTML from stats ribbon (optional, for debugging)"
+        }
+      }
+    },
+    "notes": {
+      "type": "string",
+      "description": "Any additional notes or observations"
+    }
+  }
+}

@@ -31,7 +31,7 @@ scolia:
     - ton_plus_count
     - highest_checkout
 
-# Dart Connect Configuration  
+# Dart Connect Configuration
 dart_connect:
   base_url: "https://dartconnect.com"
   api_endpoint: "https://api.dartconnect.com/v1"
@@ -54,6 +54,53 @@ dart_connect:
     - checkout_percentage
     - first_nine_average
     - pressure_situations
+
+# GoDartsPro Configuration
+godartspro:
+  base_url: "https://godartspro.com"
+  # Authentication - set via environment variables
+  # GODARTSPRO_USERNAME and GODARTSPRO_PASSWORD
+  session_timeout: 3600
+  retry_attempts: 3
+  retry_delay: 5
+  rate_limit_seconds: 2.0  # Delay between page navigations
+  browser:
+    headless: true
+    timeout: 30000  # 30 seconds
+    viewport:
+      width: 1920
+      height: 1080
+  selectors:
+    # Update these selectors based on actual GoDartsPro site structure
+    login_username: "#username"
+    login_password: "#password"
+    login_submit: "button[type='submit']"
+    dashboard_stats: ".dashboard-stats"
+    training_log: ".training-log"
+    drill_entry: ".drill-entry"
+    your_stats_ribbon: ".stats-ribbon.red, button:has-text('Your Stats')"
+    session_date: ".session-date"
+    stats_table: ".stats-table"
+  data_types:
+    - dashboard_statistics
+    - training_log_entries
+    - session_statistics
+  metrics_to_capture:
+    - three_dart_average
+    - first_nine_average
+    - checkout_percentage
+    - doubles_percentage
+    - triples_percentage
+    - 180s_count
+    - 140_plus_count
+    - 100_plus_count
+    - highest_checkout
+    - total_darts
+    - session_count
+  state_management:
+    enabled: true
+    state_file: "godartspro_scraper_state.json"
+    track_last_processed_date: true
 
 # Biomechanics Configuration
 biomechanics:
