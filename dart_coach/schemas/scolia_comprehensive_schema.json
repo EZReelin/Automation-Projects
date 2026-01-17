@@ -1,0 +1,267 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "scolia_comprehensive_schema",
+  "title": "Scolia Comprehensive Statistics Schema",
+  "description": "Schema for comprehensive darts statistics extracted from Scolia Web Client",
+  "type": "object",
+  "required": ["scrape_timestamp", "game_types"],
+  "properties": {
+    "scrape_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when scraping was performed"
+    },
+    "scraper_version": {
+      "type": "string",
+      "description": "Version of the scraper used"
+    },
+    "game_types": {
+      "type": "object",
+      "description": "Statistics organized by game type",
+      "patternProperties": {
+        "^(x01|cricket|around_the_world|bobs_27|shanghai)$": {
+          "$ref": "#/definitions/game_type_stats"
+        }
+      }
+    }
+  },
+  "definitions": {
+    "game_type_stats": {
+      "type": "object",
+      "properties": {
+        "game_type": {
+          "type": "string",
+          "description": "Game type identifier"
+        },
+        "stats_page_data": {
+          "type": "object",
+          "description": "Overall statistics from the stats page",
+          "additionalProperties": true
+        },
+        "charts": {
+          "type": "array",
+          "description": "Chart data extracted from visualizations",
+          "items": {
+            "$ref": "#/definitions/chart_data"
+          }
+        },
+        "match_history": {
+          "type": "array",
+          "description": "Historical match data",
+          "items": {
+            "$ref": "#/definitions/match_data"
+          }
+        },
+        "error": {
+          "type": "string",
+          "description": "Error message if extraction failed"
+        }
+      }
+    },
+    "chart_data": {
+      "type": "object",
+      "properties": {
+        "chart_id": {
+          "type": "string",
+          "description": "Identifier for the chart"
+        },
+        "type": {
+          "type": "string",
+          "description": "Chart type (line, bar, pie, etc.)"
+        },
+        "data": {
+          "type": "object",
+          "description": "Numerical data from the chart",
+          "additionalProperties": true
+        }
+      }
+    },
+    "match_data": {
+      "type": "object",
+      "properties": {
+        "match_id": {
+          "type": "string",
+          "description": "Unique match identifier"
+        },
+        "date": {
+          "type": "string",
+          "description": "Match date"
+        },
+        "opponent": {
+          "type": "string",
+          "description": "Opponent name"
+        },
+        "result": {
+          "type": "string",
+          "description": "Match result (won/lost)"
+        },
+        "score": {
+          "type": "string",
+          "description": "Match score"
+        },
+        "tabs": {
+          "type": "object",
+          "description": "Data from different tabs in match view",
+          "properties": {
+            "throw_analysis": {
+              "$ref": "#/definitions/tab_data"
+            },
+            "scoring": {
+              "$ref": "#/definitions/tab_data"
+            },
+            "score_history": {
+              "$ref": "#/definitions/tab_data",
+              "description": "X01 games only"
+            },
+            "marks": {
+              "$ref": "#/definitions/tab_data",
+              "description": "Cricket games only"
+            }
+          }
+        },
+        "timeline_analysis": {
+          "type": "object",
+          "description": "Timeline analysis for X01 games",
+          "properties": {
+            "points": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "turn": {
+                    "type": "string"
+                  },
+                  "score": {
+                    "type": "string"
+                  },
+                  "remaining": {
+                    "type": "string"
+                  },
+                  "average": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "scoring_analysis": {
+          "type": "object",
+          "description": "Scoring analysis for X01 games",
+          "additionalProperties": true
+        },
+        "legs": {
+          "type": "array",
+          "description": "Individual leg data",
+          "items": {
+            "$ref": "#/definitions/leg_data"
+          }
+        }
+      }
+    },
+    "tab_data": {
+      "type": "object",
+      "description": "Data extracted from a match tab",
+      "properties": {
+        "tables": {
+          "type": "array",
+          "description": "Tabular data",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "lists": {
+          "type": "array",
+          "description": "List data",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "metrics": {
+          "type": "object",
+          "description": "Key-value metrics",
+          "additionalProperties": true
+        }
+      }
+    },
+    "leg_data": {
+      "type": "object",
+      "properties": {
+        "leg_number": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Leg number in the match"
+        },
+        "turns": {
+          "type": "array",
+          "description": "Turn-by-turn data for the leg",
+          "items": {
+            "$ref": "#/definitions/turn_data"
+          }
+        },
+        "summary": {
+          "type": "object",
+          "description": "Leg summary statistics",
+          "additionalProperties": true
+        }
+      }
+    },
+    "turn_data": {
+      "type": "object",
+      "properties": {
+        "turn_number": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Turn number in the leg"
+        },
+        "throws": {
+          "type": "array",
+          "description": "Individual throw data (typically 3 darts)",
+          "items": {
+            "$ref": "#/definitions/throw_data"
+          },
+          "minItems": 0,
+          "maxItems": 3
+        },
+        "total_score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 180,
+          "description": "Total score for the turn"
+        },
+        "remaining": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Remaining score after this turn"
+        }
+      }
+    },
+    "throw_data": {
+      "type": "object",
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "Target segment (e.g., 'T20', 'D16', '5')"
+        },
+        "score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 60,
+          "description": "Score for this throw"
+        },
+        "multiplier": {
+          "type": "string",
+          "enum": ["1", "2", "3"],
+          "description": "Multiplier (1=single, 2=double, 3=triple)"
+        }
+      }
+    }
+  }
+}
