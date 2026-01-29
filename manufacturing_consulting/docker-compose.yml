@@ -1,0 +1,120 @@
+# Manufacturing Consulting System - Docker Compose
+# For local development and testing
+
+version: '3.8'
+
+services:
+  # Main application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=development
+      - DEBUG=true
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=manufacturing_consulting
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - AI_ANTHROPIC_API_KEY=${AI_ANTHROPIC_API_KEY}
+      - AI_OPENAI_API_KEY=${AI_OPENAI_API_KEY}
+      - AUTH_SECRET_KEY=${AUTH_SECRET_KEY:-development-secret-key-change-me}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - ./data/uploads:/app/data/uploads
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # PostgreSQL database
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=manufacturing_consulting
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Redis for caching and task queue
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # Celery worker for background tasks (optional)
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A tasks.celery_app worker --loglevel=info
+    environment:
+      - ENVIRONMENT=development
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=manufacturing_consulting
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - AI_ANTHROPIC_API_KEY=${AI_ANTHROPIC_API_KEY}
+      - AI_OPENAI_API_KEY=${AI_OPENAI_API_KEY}
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - app-network
+    profiles:
+      - workers
+    restart: unless-stopped
+
+  # Celery beat for scheduled tasks (optional)
+  beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A tasks.celery_app beat --loglevel=info
+    environment:
+      - ENVIRONMENT=development
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - app-network
+    profiles:
+      - workers
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  app-network:
+    driver: bridge
